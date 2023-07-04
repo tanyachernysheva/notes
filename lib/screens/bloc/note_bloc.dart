@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:bloc/bloc.dart';
+import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
 import 'package:notes/models/note.dart';
 import 'package:notes/repositories/note_repository.dart';
@@ -16,6 +17,8 @@ class NoteBloc extends Bloc<NoteEvent, NoteState> {
     on<NoteCreateEvent>(_createNote);
     on<NoteUpdateEvent>(_updateNote);
     on<SetNoteCompletedEvent>(_setNoteCompleted);
+    on<UpdateFieldsEvent>(_updateFields);
+    on<NoteDeleteEvent>(_deleteNote);
   }
 
   Future<void> _getNotes(NoteGetEvent event, Emitter<NoteState> emit) async {
@@ -64,8 +67,6 @@ class NoteBloc extends Bloc<NoteEvent, NoteState> {
           );
 
       await _repository.updateNote(note);
-
-      add(const NoteEvent.get());
     } catch (e) {
       emit(NoteState.error(e.toString()));
     }
@@ -84,5 +85,39 @@ class NoteBloc extends Bloc<NoteEvent, NoteState> {
     );
 
     emit(NoteDataState(newList));
+  }
+
+  void _updateFields(UpdateFieldsEvent event, Emitter<NoteState> emit) {
+    if (state is! NoteDataState) return;
+
+    final newNote = event.note;
+    final index = event.index;
+
+    final List<Note> newList = List.of((state as NoteDataState).notes);
+
+    newList[index] = newList[index].copyWith(
+      title: newNote.title,
+      description: newNote.description,
+    );
+
+    emit(NoteDataState(newList));
+  }
+
+  Future<void> _deleteNote(
+      NoteDeleteEvent event, Emitter<NoteState> emit) async {
+    if (state is! NoteDataState) return;
+
+    try {
+      final int index = event.index;
+      final List<Note> newList = List.of((state as NoteDataState).notes);
+
+      await _repository.deleteNote(newList.removeAt(index));
+
+      emit(NoteDataState(newList));
+    } catch (e, stackTrace) {
+      emit(NoteState.error(e.toString()));
+
+      log(e.toString() + stackTrace.toString());
+    }
   }
 }

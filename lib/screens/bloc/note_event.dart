@@ -7,8 +7,11 @@ sealed class NoteEvent {
       NoteCreateEvent;
   const factory NoteEvent.get() = NoteGetEvent;
   const factory NoteEvent.update(int index) = NoteUpdateEvent;
-  const factory NoteEvent.delete() = NoteDeleteEvent;
-  const factory NoteEvent.setNoteCompleted({required int index, required bool? value}) = SetNoteCompletedEvent;
+  const factory NoteEvent.delete(int index) = NoteDeleteEvent;
+  const factory NoteEvent.setNoteCompleted(
+      {required int index, required bool? value}) = SetNoteCompletedEvent;
+  const factory NoteEvent.updateFields(
+      {required int index, required Note note}) = UpdateFieldsEvent;
 }
 
 final class NoteGetEvent extends NoteEvent {
@@ -32,7 +35,11 @@ final class NoteUpdateEvent extends NoteEvent {
 }
 
 final class NoteDeleteEvent extends NoteEvent {
-  const NoteDeleteEvent();
+  final int index;
+
+  const NoteDeleteEvent(
+    this.index,
+  );
 }
 
 final class SetNoteCompletedEvent extends NoteEvent {
@@ -42,5 +49,15 @@ final class SetNoteCompletedEvent extends NoteEvent {
   const SetNoteCompletedEvent({
     required this.index,
     required this.value,
+  });
+}
+
+final class UpdateFieldsEvent extends NoteEvent {
+  final int index;
+  final Note note;
+
+  const UpdateFieldsEvent({
+    required this.index,
+    required this.note,
   });
 }

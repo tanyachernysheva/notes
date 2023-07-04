@@ -5,6 +5,7 @@ abstract interface class Repository {
   Future<List<Note>> get();
   Future<void> createNote(Note note);
   Future<void> updateNote(Note note);
+  Future<void> deleteNote(Note note);
 }
 
 final class FakeRepository implements Repository {
@@ -39,6 +40,12 @@ final class FakeRepository implements Repository {
     // TODO: implement updateNote
     throw UnimplementedError();
   }
+
+  @override
+  Future<void> deleteNote(Note note) {
+    // TODO: implement deleteNote
+    throw UnimplementedError();
+  }
 }
 
 final class FirebaseRepository implements Repository {
@@ -68,5 +75,10 @@ final class FirebaseRepository implements Repository {
         .collection(_collectionName)
         .doc(note.id)
         .update(note.toJson());
+  }
+
+  @override
+  Future<void> deleteNote(Note note) async {
+    await _firestore.collection(_collectionName).doc(note.id).delete();
   }
 }

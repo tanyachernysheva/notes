@@ -60,6 +60,12 @@ class _HomeScreenState extends State<HomeScreen> {
                             index: index, value: value));
                         _bloc.add(NoteEvent.update(index));
                       },
+                      onFieldsChanged: () {
+                        _showNoteForm(index);
+                      },
+                      onSwipe: (direction) {
+                        _bloc.add(NoteDeleteEvent(index));
+                      },
                     );
                   },
                 )),
@@ -70,17 +76,23 @@ class _HomeScreenState extends State<HomeScreen> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _showCreateNoteForm,
+        onPressed: () => _showNoteForm(),
         child: const Icon(Icons.add),
       ),
     );
   }
 
-  void _showCreateNoteForm() {
-    String title = '';
-    String description = '';
+  Future<void> _showNoteForm([int? index]) async {
+    Note? note;
 
-    showModalBottomSheet(
+    if (index != null) {
+      note = (_bloc.state as NoteDataState).notes[index];
+    }
+
+    String title = note?.title ?? '';
+    String description = note?.description ?? '';
+
+    final newNote = await showModalBottomSheet<Note>(
       context: context,
       isScrollControlled: true,
       builder: (context) => SafeArea(
@@ -91,7 +103,8 @@ class _HomeScreenState extends State<HomeScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              TextField(
+              TextFormField(
+                initialValue: title,
                 onChanged: (value) {
                   title = value;
                 },
@@ -99,7 +112,8 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(
                 height: 8,
               ),
-              TextField(
+              TextFormField(
+                initialValue: description,
                 onChanged: (value) {
                   description = value;
                 },
@@ -109,19 +123,35 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               ElevatedButton(
                 onPressed: () {
-                  _bloc.add(NoteCreateEvent(
-                    title: title,
-                    description: description,
-                  ));
+                  if (note == null) {
+                    _bloc.add(NoteCreateEvent(
+                      title: title,
+                      description: description,
+                    ));
 
-                  Navigator.pop(context);
+                    Navigator.pop(context);
+                  } else {
+                    Navigator.pop(
+                        context,
+                        note.copyWith(
+                          title: title,
+                          description: description,
+                        ));
+                  }
                 },
-                child: const Text('create'),
+                child: Text(note == null ? 'create' : 'update'),
               ),
             ],
           ),
         ),
       ),
     );
+
+    if (newNote == null) return;
+
+    if (index != null) {
+      _bloc.add(UpdateFieldsEvent(note: newNote, index: index));
+      _bloc.add(NoteUpdateEvent(index));
+    }
   }
 }
