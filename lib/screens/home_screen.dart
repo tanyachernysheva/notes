@@ -99,49 +99,58 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Padding(
           padding: EdgeInsets.only(
               bottom: MediaQuery.of(context).viewInsets.bottom + 8),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              TextFormField(
-                initialValue: title,
-                onChanged: (value) {
-                  title = value;
-                },
-              ),
-              const SizedBox(
-                height: 8,
-              ),
-              TextFormField(
-                initialValue: description,
-                onChanged: (value) {
-                  description = value;
-                },
-              ),
-              const SizedBox(
-                height: 8,
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  if (note == null) {
-                    _bloc.add(NoteCreateEvent(
-                      title: title,
-                      description: description,
-                    ));
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                TextFormField(
+                  decoration: const InputDecoration(
+                    hintText: 'title',
+                  ),
+                  initialValue: title,
+                  onChanged: (value) {
+                    title = value;
+                  },
+                ),
+                const SizedBox(
+                  height: 8,
+                ),
+                TextFormField(
+                  decoration: const InputDecoration(
+                    hintText: 'description',
+                  ),
+                  initialValue: description,
+                  onChanged: (value) {
+                    description = value;
+                  },
+                ),
+                const SizedBox(
+                  height: 8,
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    if (note == null) {
+                      _bloc.add(NoteCreateEvent(
+                        title: title,
+                        description: description,
+                      ));
 
-                    Navigator.pop(context);
-                  } else {
-                    Navigator.pop(
-                        context,
-                        note.copyWith(
-                          title: title,
-                          description: description,
-                        ));
-                  }
-                },
-                child: Text(note == null ? 'create' : 'update'),
-              ),
-            ],
+                      Navigator.pop(context);
+                    } else {
+                      Navigator.pop(
+                          context,
+                          note.copyWith(
+                            title: title,
+                            description: description,
+                          ));
+                    }
+                  },
+                  child: Text(note == null ? 'Create' : 'Update'),
+                ),
+              ],
+            ),
           ),
         ),
       ),
