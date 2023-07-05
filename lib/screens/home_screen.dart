@@ -41,6 +41,9 @@ class _HomeScreenState extends State<HomeScreen> {
         bloc: _bloc,
         builder: (context, state) {
           return switch (state) {
+            NoteInitialState() => const Center(
+                child: Text('Create your first Note'),
+              ),
             NoteLoadingState() => const Center(
                 child: CircularProgressIndicator(),
               ),
@@ -65,12 +68,22 @@ class _HomeScreenState extends State<HomeScreen> {
                       },
                       onSwipe: (direction) {
                         _bloc.add(NoteDeleteEvent(index));
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            backgroundColor: Colors.green,
+                            content: Text(
+                              '${state.notes[index].title} note has been deleted',
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        );
                       },
                     );
                   },
                 )),
-            NoteErrorState() => Center(
-                child: Text(state.message),
+            NoteErrorState() => const Center(
+                child: Text('Something went wrong'),
               ),
           };
         },

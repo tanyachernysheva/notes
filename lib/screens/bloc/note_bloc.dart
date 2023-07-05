@@ -12,7 +12,7 @@ part 'note_state.dart';
 class NoteBloc extends Bloc<NoteEvent, NoteState> {
   final Repository _repository;
 
-  NoteBloc(this._repository) : super(const NoteState.loading()) {
+  NoteBloc(this._repository) : super(const NoteState.initial()) {
     on<NoteGetEvent>(_getNotes);
     on<NoteCreateEvent>(_createNote);
     on<NoteUpdateEvent>(_updateNote);
@@ -25,9 +25,13 @@ class NoteBloc extends Bloc<NoteEvent, NoteState> {
     try {
       emit(const NoteState.loading());
 
-      List<Note> notes = await _repository.get();
+      final List<Note> notes = await _repository.get();
 
-      emit(NoteState.data(notes));
+      if (notes.isEmpty) {
+        emit(const NoteState.initial());
+      } else {
+        emit(NoteState.data(notes));
+      }
     } catch (e, stackTrace) {
       emit(NoteState.error(e.toString()));
 
@@ -113,7 +117,11 @@ class NoteBloc extends Bloc<NoteEvent, NoteState> {
 
       await _repository.deleteNote(newList.removeAt(index));
 
-      emit(NoteDataState(newList));
+      if (newList.isEmpty) {
+        emit(const NoteState.initial());
+      } else {
+        emit(NoteDataState(newList));
+      }
     } catch (e, stackTrace) {
       emit(NoteState.error(e.toString()));
 
